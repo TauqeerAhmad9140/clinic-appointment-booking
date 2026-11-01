@@ -1,81 +1,175 @@
-# Clinic Appointment Booking
+# CarePoint – Clinic Appointment Booking System
 
-A beginner-friendly MERN starter for clinic appointments.
+CarePoint is a MERN-stack web application for booking and managing clinic appointments. Patients can find doctors, view available time slots, and manage their appointments. Doctors can manage their weekly availability, block leave dates, and update appointment statuses.
 
-## Stack
-- Frontend: React + Vite, React Router, Axios, plain CSS
-- Backend: Node.js, Express, MongoDB/Mongoose, JWT, bcryptjs
-- Tests: Node's built-in test runner + Supertest
+## Features
 
-## Setup
+### Patient
+- Register and log in to a patient account.
+- Browse and search doctors by name or specialty.
+- View available appointment slots for a selected date.
+- Book appointments with a doctor.
+- View upcoming and past appointments.
+- Cancel or reschedule booked appointments.
+- Cancellation and rescheduling are restricted within two hours of the appointment start time.
 
-### 1. Backend
+### Doctor
+- Log in to a doctor account.
+- View appointments scheduled for the current day.
+- Mark booked appointments as **Completed** or **No-show**.
+- Manage weekly working hours from the doctor dashboard.
+- Choose an appointment slot duration of 15 or 30 minutes.
+- Block a date as leave and remove a previously blocked leave date.
+
+### Booking rules
+- Patients can only book future appointment slots.
+- Available slots are generated from each doctor's weekly schedule.
+- Booked slots are not offered to other patients.
+- A MongoDB unique partial index protects against duplicate bookings for the same doctor and start time.
+- Doctor leave dates are excluded from slot availability and checked by the booking endpoint.
+- A doctor cannot block a date that already has booked appointments.
+
+## Tech Stack
+
+**Frontend**
+- React 18
+- Vite
+- React Router
+- Axios
+- Lucide React
+- CSS
+
+**Backend**
+- Node.js
+- Express
+- MongoDB and Mongoose
+- JSON Web Tokens (JWT)
+- bcryptjs
+- dotenv
+
+## Project Structure
+
+```text
+clinic-appointment-booking/
+├── client/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── api.js
+│   │   ├── main.jsx
+│   │   └── styles.css
+│   ├── index.html
+│   └── package.json
+├── server/
+│   ├── src/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── utils/
+│   │   ├── seed.js
+│   │   ├── seedDoctors.js
+│   │   └── server.js
+│   └── package.json
+├── .gitignore
+└── README.md
+```
+
+## Prerequisites
+
+- Node.js and npm
+- A MongoDB Atlas cluster (or another reachable MongoDB instance)
+- Git
+
+## Local Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/TauqeerAhmad9140/clinic-appointment-booking.git
+cd clinic-appointment-booking
+```
+
+### 2. Configure and start the backend
+
 ```bash
 cd server
 npm install
-copy .env.example .env
 ```
-Open `server/.env` and set `MONGO_URI` to your MongoDB Atlas connection string and change `JWT_SECRET` to a long random value.
 
-Seed demo doctors:
-```bash
-npm run seed
+Create a file named `.env` inside the `server` folder and add your own values:
+
+```env
+PORT=5000
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database-name>
+JWT_SECRET=replace_with_a_long_random_secret
+CLIENT_URL=http://localhost:5173
 ```
-Start API:
+
+Do not commit this `.env` file. Use your own MongoDB credentials and a new secret.
+
+Seed the three demo doctor accounts and profiles:
+
+```bash
+node src/seedDoctors.js
+```
+
+Start the backend:
+
 ```bash
 npm run dev
 ```
-API runs at `http://localhost:5000`.
 
-### 2. Frontend
-Open a second terminal:
+The API runs at `http://localhost:5000`.
+
+### 3. Configure and start the frontend
+
+Open a second terminal from the project root:
+
 ```bash
 cd client
 npm install
 npm run dev
 ```
-Open the Vite URL shown (usually `http://localhost:5173`).
 
-## Demo data
-The seed script creates three doctor profiles:
-- Dr. Aisha Khan — Cardiology
-- Dr. Rahul Sharma — Dermatology
-- Dr. Neha Verma — General Medicine
+Open the Vite URL shown in the terminal, usually `http://localhost:5173`.
 
-The seed script does not create a demo patient account. Register through the UI.
+## Demo Doctor Accounts
 
-## Main features
-- Patient registration and login
-- Browse doctors and specialties
-- Weekly availability per doctor
-- Find available slots for a selected date
-- Book an appointment
-- Patient dashboard with upcoming/past appointments
-- Cancel appointments, subject to the 2-hour rule
-- Doctor dashboard to view today's appointments and mark completed/no-show
-- Server-side validation and basic collision prevention
-- Responsive UI
+Run `node src/seedDoctors.js` from the `server` directory after configuring `server/.env`.
 
-## Important design notes
-- Appointment dates are stored as JavaScript dates in MongoDB.
-- The booking endpoint checks for an existing booked appointment for the doctor and exact start time before creating one. The database also has a unique partial index for doctor + start time for booked appointments.
-- In production, consider transactions and retry handling for race conditions, and use a replica set if you rely on MongoDB transactions.
-- This is a starter assignment project, not a production medical system. Add rate limiting, email verification, audit logs, stronger role management, and deployment secrets before real-world use.
+| Doctor | Specialty | Email |
+|---|---|---|
+| Dr. Ayesha Khan | Cardiologist | `dr.ayesha@example.com` |
+| Dr. Rahul Verma | Dermatologist | `dr.rahul@example.com` |
+| Dr. Neha Sharma | General Physician | `dr.neha@example.com` |
 
-## Environment
-See `server/.env.example`. Never commit `.env`.
+**Demo password for all three accounts:** `Doctor@123`
+
+These are local demonstration accounts only. Do not use this shared password for real users or in a production deployment. Patients can create an account through the registration page.
 
 ## Tests
+
+Run the backend's included tests from the `server` directory:
+
 ```bash
-cd server
 npm test
 ```
-The included tests cover basic validation helpers. For full integration tests, configure a test MongoDB database and expand the suite.
 
-## AI tools used
-Disclose any AI assistance you used while building or modifying this project, according to the assignment rules.
+The current test suite includes basic validation tests. Manual end-to-end testing of booking, cancellation, rescheduling, availability, leave dates, and doctor appointment status is also recommended.
 
-## Known limitations / next steps
-- Rescheduling can be done by cancelling and booking another slot; a dedicated reschedule UI can be added.
-- Doctor leave management and reminders are not included.
-- Add pagination, richer error messages, and integration tests before submission.
+## Security and Production Notes
+
+- Never commit `.env`, database credentials, or private keys.
+- The demo doctor credentials are for local evaluation only.
+- This project is an academic/demo application, not a production-ready medical records system.
+- Before real-world use, add stronger account provisioning, rate limiting, email verification, audit logging, monitoring, secure deployment configuration, and broader automated integration tests.
+
+## Author
+
+**Tauqeer Ahmad**
+
+- GitHub: [TauqeerAhmad9140](https://github.com/TauqeerAhmad9140)
+- Repository: [CarePoint – Clinic Appointment Booking System](https://github.com/TauqeerAhmad9140/clinic-appointment-booking)
+
+## Acknowledgement
+
+AI assistance was used for parts of development support, debugging guidance, and documentation.
